@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="AI Smart Bandage — Real-time wound monitoring, vitals tracking, and intelligent drug delivery." />
+
+  <!-- ── PWA Core ── -->
+  <meta name="theme-color" content="#070e1c" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- ── Apple / iOS PWA ── -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SmartBandage" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-512.png" />
+
+  <!-- ── Android / Chrome ── -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="SmartBandage AI" />
+
+  <!-- ── Microsoft / Edge ── -->
+  <meta name="msapplication-TileColor" content="#070e1c" />
+  <meta name="msapplication-TileImage" content="assets/icons/icon-192.png" />
+  <meta name="msapplication-config" content="none" />
+
+  <!-- ── Open Graph (sharing previews) ── -->
+  <meta property="og:title" content="SmartBandage AI — Wound Monitor" />
+  <meta property="og:description" content="Real-time AI wound monitoring, vitals tracking, and intelligent drug delivery." />
+  <meta property="og:image" content="assets/icons/icon-512.png" />
+  <meta property="og:type" content="website" />
+
+  <title>SmartBandage AI — Wound Monitor</title>
+
+  <!-- ── Fonts ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- ── Libraries ── -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+
+  <!-- ── Styles ── -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/mobile.css" />
+
+  <!-- ── PWA Install Banner Styles ── -->
+  <style>
+    #pwa-install-banner {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      background: linear-gradient(135deg, #0d1f35 0%, #0a1628 100%);
+      border-top: 1px solid rgba(0,229,160,0.25);
+      padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+      display: none;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
+      animation: slideUp 0.3s ease;
+    }
+    #pwa-install-banner.show { display: flex; }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+    #pwa-install-banner .pwa-icon {
+      width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+      background: #070e1c; padding: 4px;
+    }
+    #pwa-install-banner .pwa-text { flex: 1; }
+    #pwa-install-banner .pwa-text strong {
+      display: block; font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px; font-weight: 600; color: #f0f6ff;
+    }
+    #pwa-install-banner .pwa-text small {
+      font-size: 11px; color: #7a9ab5;
+    }
+    #pwa-install-btn {
+      background: linear-gradient(135deg, #00e5a0, #00b57a);
+      color: #070e1c; border: none; border-radius: 10px;
+      padding: 10px 18px; font-size: 13px; font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer; white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,229,160,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    #pwa-install-btn:active { transform: scale(0.96); }
+    #pwa-dismiss-btn {
+      background: none; border: none; color: #4a6a85;
+      font-size: 20px; cursor: pointer; padding: 4px 8px;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ WELCOME SCREEN ═══════════════ -->
+<div class="auth-screen" id="welcome-screen">
+  <div class="welcome-container">
+    <div class="welcome-logo">
+      <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+        <rect x="4" y="12" width="24" height="8" rx="3" fill="#00e5a0"/>
+        <rect x="12" y="4" width="8" height="24" rx="3" fill="#00e5a0"/>
+        <circle cx="16" cy="16" r="3.5" fill="#070e1c"/>
+      </svg>
+    </div>
+    <h1 class="welcome-title">SmartBandage AI</h1>
+    <p class="welcome-sub">AI-powered wound monitoring, vitals tracking, and intelligent drug delivery — all in real time.</p>
+    <div class="welcome-features">
+      <div class="welcome-feat"><span class="welcome-feat-icon">🌡</span>Live Vitals</div>
+      <div class="welcome-feat"><span class="welcome-feat-icon">🤖</span>AI Analysis</div>
+      <div class="welcome-feat"><span class="welcome-feat-icon">💊</span>Drug Delivery</div>
+    </div>
+    <div class="welcome-actions">
+      <button class="btn-get-started" id="btn-get-started">Get Started →</button>
+      <button class="btn-login-link" id="btn-have-account">I already have an account</button>
+    </div>
+    <span class="welcome-version">v2.0 · PWA Ready</span>
+  </div>
+</div>
+
+<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<div class="auth-screen hidden" id="login-screen">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <button class="auth-back" id="btn-login-back">← Back</button>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">
+        <div class="patient-avatar" id="login-avatar-text" style="width:48px;height:48px;font-size:16px">SB</div>
+        <div>
+          <div class="auth-card-title" id="login-greeting">Welcome back!</div>
+          <div class="auth-card-sub">Enter your 4-digit PIN to continue</div>
+        </div>
+      </div>
+    </div>
+    <div class="auth-body">
+      <div class="pin-input-group">
+        <input class="pin-digit" id="pin-1" type="password" maxlength="1" inputmode="numeric" autocomplete="off"/>
+        <input class="pin-digit" id="pin-2" type="password" maxlength="1" inputmode="numeric" autocomplete="off"/>
+        <input class="pin-digit" id="pin-3" type="password" maxlength="1" inputmode="numeric" autocomplete="off"/>
+        <input class="pin-digit" id="pin-4" type="password" maxlength="1" inputmode="numeric" autocomplete="off"/>
+      </div>
+      <div id="login-error" style="display:none;text-align:center;font-size:12px;color:var(--danger)"></div>
+      <div class="auth-actions">
+        <button class="btn-auth-primary" id="btn-login-submit">Unlock →</button>
+        <button class="btn-auth-secondary" id="btn-login-forgot">Forgot PIN? Reset account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ REGISTER SCREEN ═══════════════ -->
+<div class="auth-screen hidden" id="register-screen">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <button class="auth-back" id="reg-back-welcome">← Back</button>
+      <div class="auth-card-title">Create Your Profile</div>
+      <div class="auth-card-sub">Set up your SmartBandage AI account</div>
+    </div>
+    <div class="step-progress">
+      <div class="step-dot active"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+      <div class="step-line"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="auth-body">
+
+      <!-- STEP 1: Your Profile -->
+      <div class="auth-step active" id="reg-step-1">
+        <div class="auth-field">
+          <label for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" placeholder="Dr. Jane Smith"/>
+          <span class="field-error">Please enter your name</span>
+        </div>
+        <div class="auth-field">
+          <label for="reg-email">Email Address</label>
+          <input type="email" id="reg-email" placeholder="jane@hospital.com"/>
+          <span class="field-error">Please enter a valid email</span>
+        </div>
+        <div class="auth-field">
+          <label>Your Role</label>
+          <div class="role-selector">
+            <div class="role-option" data-role="Doctor"><div class="role-option-icon">🩺</div>Doctor</div>
+            <div class="role-option" data-role="Nurse"><div class="role-option-icon">💉</div>Nurse</div>
+            <div class="role-option" data-role="Caregiver"><div class="role-option-icon">🤝</div>Caregiver</div>
+            <div class="role-option" data-role="Patient"><div class="role-option-icon">🧑</div>Patient</div>
+          </div>
+        </div>
+        <div class="auth-field">
+          <label for="reg-pin">Create a 4-digit PIN</label>
+          <input type="password" id="reg-pin" placeholder="••••" maxlength="4" inputmode="numeric"/>
+          <span class="field-error">PIN must be 4 digits</span>
+        </div>
+      </div>
+
+      <!-- STEP 2: Patient Details -->
+      <div class="auth-step" id="reg-step-2">
+        <div class="auth-field">
+          <label for="reg-patient-name">Patient Name</label>
+          <input type="text" id="reg-patient-name" placeholder="John Doe"/>
+          <span class="field-error">Please enter patient name</span>
+        </div>
+        <div class="auth-field-row">
+          <div class="auth-field">
+            <label for="reg-patient-id">Patient ID</label>
+            <input type="text" id="reg-patient-id" placeholder="PT-001"/>
+            <span class="field-error">Required</span>
+          </div>
+          <div class="auth-field">
+            <label for="reg-patient-weight">Weight (kg)</label>
+            <input type="number" id="reg-patient-weight" placeholder="70" min="1" max="300"/>
+            <span class="field-error">Required</span>
+          </div>
+        </div>
+        <div class="auth-field">
+          <label for="reg-wound-type">Wound Type</label>
+          <select id="reg-wound-type">
+            <option value="unknown">Unknown / Let AI decide</option>
+            <option value="laceration">Laceration</option>
+            <option value="bruise">Bruise / Contusion</option>
+            <option value="burn">Burn</option>
+            <option value="abrasion">Abrasion</option>
+            <option value="ulcer">Chronic Ulcer</option>
+            <option value="infected">Infected Wound</option>
+          </select>
+        </div>
+        <div class="auth-field">
+          <label for="reg-allergies">Known Allergies (optional)</label>
+          <textarea id="reg-allergies" placeholder="e.g. Penicillin, Sulfa drugs…"></textarea>
+        </div>
+      </div>
+
+      <!-- STEP 3: Device Setup & Review -->
+      <div class="auth-step" id="reg-step-3">
+        <div class="auth-field">
+          <label>Connection Preference</label>
+          <div class="conn-selector">
+            <div class="conn-option" data-conn="bluetooth"><span class="conn-option-icon">🔵</span><div class="conn-option-text"><strong>Bluetooth (BLE)</strong><small>ESP32 / nRF52 wireless</small></div></div>
+            <div class="conn-option" data-conn="serial"><span class="conn-option-icon">🔌</span><div class="conn-option-text"><strong>USB Serial</strong><small>Arduino / USB-C cable</small></div></div>
+            <div class="conn-option selected" data-conn="simulation"><span class="conn-option-icon">🎭</span><div class="conn-option-text"><strong>Simulation Mode</strong><small>Demo with realistic data</small></div></div>
+          </div>
+        </div>
+        <div class="auth-field">
+          <label for="reg-api-key">Gemini API Key (optional)</label>
+          <input type="password" id="reg-api-key" placeholder="AIza…"/>
+        </div>
+        <div class="auth-divider">Review</div>
+        <div class="review-summary" id="reg-review"></div>
+      </div>
+
+      <div class="auth-actions">
+        <button class="btn-auth-primary" id="reg-next-btn">Continue →</button>
+        <button class="btn-auth-secondary" id="reg-back-btn" style="display:none">← Previous Step</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP SHELL (existing dashboard) ═══════════════ -->
+<div id="app-shell" class="hidden">
+
+<!-- ALERT BANNER -->
+<div id="alert-banner" class="alert-banner hidden" role="alert" aria-live="assertive">
+  <div class="alert-banner__icon" id="alert-icon">⚠️</div>
+  <div class="alert-banner__body"><strong id="alert-title">Alert</strong><span id="alert-msg">—</span></div>
+  <button class="alert-banner__close" id="alert-close" aria-label="Dismiss">✕</button>
+</div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+          <rect x="4" y="12" width="24" height="8" rx="3" fill="#00e5a0"/>
+          <rect x="12" y="4" width="8" height="24" rx="3" fill="#00e5a0"/>
+          <circle cx="16" cy="16" r="3.5" fill="#070e1c"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-name">SmartBandage</span>
+        <span class="logo-sub">AI Monitor</span>
+      </div>
+    </div>
+    <div class="patient-chip" id="patient-chip">
+      <div class="patient-avatar" id="patient-avatar">JP</div>
+      <div class="patient-info">
+        <span class="patient-name" id="patient-name-disp">John Patient</span>
+        <span class="patient-id" id="patient-id-disp">PT-001 · 70 kg</span>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="conn-status" id="conn-status">
+      <span class="conn-dot" id="conn-dot"></span>
+      <span class="conn-label" id="conn-label">Simulation</span>
+    </div>
+    <button class="btn-connect" id="btn-connect">Connect Device</button>
+    <button class="btn-icon" id="btn-alerts" aria-label="Alerts">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="badge hidden" id="alert-badge">0</span>
+    </button>
+    <button class="btn-icon" id="btn-settings" aria-label="Settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ═══ MOBILE HEADER (finance-app style) ═══ -->
+<div id="mob-header">
+  <div class="mob-header-top">
+    <div class="mob-user-info">
+      <div class="mob-avatar" id="mob-avatar">JP</div>
+      <div class="mob-greeting-text">
+        <span class="mob-hi">Good day,</span>
+        <span class="mob-name" id="mob-name">John Patient</span>
+      </div>
+    </div>
+    <div class="mob-header-actions">
+      <button class="mob-icon-btn" id="mob-btn-alerts" aria-label="Alerts">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="badge hidden" id="mob-alert-badge">0</span>
+      </button>
+      <button class="mob-icon-btn" id="mob-btn-settings" aria-label="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="mob-status-card">
+    <div>
+      <span class="mob-status-label">Wound Health Score</span>
+      <span class="mob-status-value" id="mob-health-score">Good</span>
+      <div class="mob-status-sub">
+        <span id="mob-temp-quick">36.8°C</span>
+        &nbsp;·&nbsp;
+        <span id="mob-spo2-quick">97% SpO₂</span>
+      </div>
+    </div>
+    <div class="mob-live-pill">
+      <div class="mob-live-dot-wrap">
+        <span class="mob-live-dot"></span>
+        <span class="mob-live-text">LIVE</span>
+      </div>
+      <span class="mob-session-time" id="mob-session">00:00:00</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MOBILE QUICK ACTIONS ═══ -->
+<div id="mob-quick-actions">
+  <p class="mob-section-title" style="padding: 0 18px">Quick Access</p>
+  <div class="mob-actions-grid" style="padding: 0 18px">
+    <button class="mob-action-btn" data-panel="vitals" id="mqa-vitals">
+      <div class="mob-action-icon vitals">🌡️</div>
+      <span class="mob-action-label">Vitals</span>
+    </button>
+    <button class="mob-action-btn" data-panel="chart" id="mqa-chart">
+      <div class="mob-action-icon trends">📈</div>
+      <span class="mob-action-label">Trends</span>
+    </button>
+    <button class="mob-action-btn" data-panel="wound" id="mqa-wound">
+      <div class="mob-action-icon wound">🩹</div>
+      <span class="mob-action-label">AI Scan</span>
+    </button>
+    <button class="mob-action-btn" data-panel="drug" id="mqa-drug">
+      <div class="mob-action-icon drugs">💊</div>
+      <span class="mob-action-label">Drugs</span>
+    </button>
+    <button class="mob-action-btn" id="mqa-connect">
+      <div class="mob-action-icon connect">🔗</div>
+      <span class="mob-action-label">Connect</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══ MOBILE VITALS ROW ═══ -->
+<div id="mob-vitals-row">
+  <p class="mob-section-title" style="padding: 0 18px; margin-top: 20px">Live Sensors</p>
+  <div class="mob-vitals-scroll">
+    <div class="mob-vital-card temp" id="mvc-temp">
+      <div class="mob-vital-top">
+        <span class="mob-vital-icon">🌡</span>
+        <span class="mob-vital-badge normal" id="mvc-temp-badge">Normal</span>
+      </div>
+      <div>
+        <div class="mob-vital-value" id="mvc-temp-val">36.8</div>
+        <div class="mob-vital-unit">°C</div>
+      </div>
+      <div class="mob-vital-label">Temperature</div>
+    </div>
+    <div class="mob-vital-card spo2" id="mvc-spo2">
+      <div class="mob-vital-top">
+        <span class="mob-vital-icon">🩸</span>
+        <span class="mob-vital-badge normal" id="mvc-spo2-badge">Normal</span>
+      </div>
+      <div>
+        <div class="mob-vital-value" id="mvc-spo2-val">97</div>
+        <div class="mob-vital-unit">%</div>
+      </div>
+      <div class="mob-vital-label">SpO₂</div>
+    </div>
+    <div class="mob-vital-card h2o2" id="mvc-h2o2">
+      <div class="mob-vital-top">
+        <span class="mob-vital-icon">🧪</span>
+        <span class="mob-vital-badge normal" id="mvc-h2o2-badge">Normal</span>
+      </div>
+      <div>
+        <div class="mob-vital-value" id="mvc-h2o2-val">0.20</div>
+        <div class="mob-vital-unit">mM H₂O₂</div>
+      </div>
+      <div class="mob-vital-label">Oxidative Stress</div>
+    </div>
+    <div class="mob-vital-card hr" id="mvc-hr">
+      <div class="mob-vital-top">
+        <span class="mob-vital-icon">❤️</span>
+        <span class="mob-vital-badge normal">Normal</span>
+      </div>
+      <div>
+        <div class="mob-vital-value" id="mvc-hr-val">72</div>
+        <div class="mob-vital-unit">bpm</div>
+      </div>
+      <div class="mob-vital-label">Heart Rate</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<main class="dashboard" id="dashboard">
+
+  <!-- LEFT: Vitals -->
+  <section class="panel vitals-panel" aria-label="Vital Signs">
+    <div class="panel-hdr">
+      <h2 class="panel-title">Vital Signs</h2>
+      <div class="live-pill"><span class="live-dot"></span>LIVE</div>
+    </div>
+    <div class="gauges-grid">
+      <div class="gauge-wrap" id="temp-wrap">
+        <svg class="gauge-svg" viewBox="0 0 120 120">
+          <circle class="g-track" cx="60" cy="60" r="48"/>
+          <circle class="g-fill g-temp" id="g-temp" cx="60" cy="60" r="48"/>
+          <text class="g-val" x="60" y="57" text-anchor="middle" id="temp-val">36.8</text>
+          <text class="g-unit" x="60" y="73" text-anchor="middle">°C</text>
+        </svg>
+        <div class="gauge-label">Temperature</div>
+        <div class="gauge-badge normal" id="temp-badge">Normal</div>
+      </div>
+      <div class="gauge-wrap" id="spo2-wrap">
+        <svg class="gauge-svg" viewBox="0 0 120 120">
+          <circle class="g-track" cx="60" cy="60" r="48"/>
+          <circle class="g-fill g-spo2" id="g-spo2" cx="60" cy="60" r="48"/>
+          <text class="g-val" x="60" y="57" text-anchor="middle" id="spo2-val">97</text>
+          <text class="g-unit" x="60" y="73" text-anchor="middle">%</text>
+        </svg>
+        <div class="gauge-label">SpO₂</div>
+        <div class="gauge-badge normal" id="spo2-badge">Normal</div>
+      </div>
+      <div class="gauge-wrap" id="h2o2-wrap">
+        <svg class="gauge-svg" viewBox="0 0 120 120">
+          <circle class="g-track" cx="60" cy="60" r="48"/>
+          <circle class="g-fill g-h2o2" id="g-h2o2" cx="60" cy="60" r="48"/>
+          <text class="g-val" x="60" y="57" text-anchor="middle" id="h2o2-val">0.20</text>
+          <text class="g-unit" x="60" y="73" text-anchor="middle">mM</text>
+        </svg>
+        <div class="gauge-label">H₂O₂</div>
+        <div class="gauge-badge normal" id="h2o2-badge">Normal</div>
+      </div>
+    </div>
+    <div class="vitals-stats">
+      <div class="stat-row"><span>Wound ΔTemp</span><span id="stat-delta">+0.3 °C</span></div>
+      <div class="stat-row"><span>Heart Rate</span><span id="stat-hr">72 bpm</span></div>
+      <div class="stat-row"><span>Session Time</span><span id="stat-session">00:00:00</span></div>
+      <div class="stat-row"><span>Last Release</span><span id="stat-last-release">—</span></div>
+    </div>
+  </section>
+
+  <!-- CENTER: Chart + Wound -->
+  <div class="center-col">
+    <section class="panel chart-panel" aria-label="Vitals Trends">
+      <div class="panel-hdr">
+        <h2 class="panel-title">Real-time Trends <span class="panel-sub">— last 60 s</span></h2>
+        <div class="chart-toggles">
+          <button class="ctoggle active" data-ds="0" id="ct-temp">🌡 Temp</button>
+          <button class="ctoggle active" data-ds="1" id="ct-spo2">🩸 SpO₂</button>
+          <button class="ctoggle active" data-ds="2" id="ct-h2o2">🧪 H₂O₂</button>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="vitals-chart" aria-label="Live vitals chart"></canvas></div>
+    </section>
+
+    <section class="panel wound-panel" aria-label="Wound Analysis">
+      <div class="panel-hdr">
+        <h2 class="panel-title">Wound Analysis</h2>
+        <div class="wound-actions">
+          <label class="btn-secondary btn-sm" for="wound-upload">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload
+          </label>
+          <input type="file" id="wound-upload" accept="image/*" class="hidden" aria-label="Upload wound image"/>
+          <button class="btn-primary btn-sm" id="btn-ai-analyze" disabled>✦ AI Analyze</button>
+        </div>
+      </div>
+      <div class="wound-body">
+        <div class="wound-drop-zone" id="wound-drop">
+          <div class="drop-placeholder" id="drop-placeholder">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <p>Drop wound image or use Upload</p>
+          </div>
+          <img id="wound-img" class="wound-img hidden" alt="Wound capture" />
+        </div>
+        <div class="wound-result" id="wound-result">
+          <div class="wound-type-row">
+            <span class="result-label">Wound Type</span>
+            <span class="result-chip" id="wound-type-chip">—</span>
+          </div>
+          <div class="wound-severity-bar">
+            <span class="result-label">Severity</span>
+            <div class="severity-track"><div class="severity-fill" id="severity-fill" style="width:0%"></div></div>
+            <span class="severity-pct" id="severity-pct">—</span>
+          </div>
+          <div class="wound-ai-text" id="wound-ai-text">Upload an image and click AI Analyze to get wound assessment.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- RIGHT: Drug Management (suggestions + release controls only) -->
+  <section class="panel drug-panel" aria-label="Drug Management">
+    <div class="panel-hdr">
+      <h2 class="panel-title">Drug Management</h2>
+      <button class="btn-secondary btn-sm" id="btn-refresh-drugs">↻ Refresh</button>
+    </div>
+
+    <div class="drug-section-label">AI Suggestions</div>
+    <div class="drug-suggestions" id="drug-suggestions">
+      <div class="drug-empty">Analyzing vitals…</div>
+    </div>
+
+    <div class="drug-section-label" style="margin-top:12px">Drug Release</div>
+    <div class="release-controls">
+      <div class="dose-calc">
+        <label class="field-label" for="dose-drug">Drug</label>
+        <select id="dose-drug" class="field-select">
+          <optgroup label="Antibiotics">
+            <option value="amoxicillin">Amoxicillin-Clavulanate (500/125 mg)</option>
+            <option value="clindamycin">Clindamycin (300 mg)</option>
+            <option value="metronidazole">Metronidazole (400 mg)</option>
+            <option value="mupirocin">Mupirocin 2% Ointment</option>
+            <option value="fusidic">Fusidic Acid 2%</option>
+            <option value="cephalexin">Cephalexin (500 mg)</option>
+          </optgroup>
+          <optgroup label="Antimicrobials">
+            <option value="silver">Silver Sulfadiazine 1%</option>
+            <option value="povidone">Povidone-Iodine 10%</option>
+            <option value="chlorhexidine">Chlorhexidine 0.05%</option>
+            <option value="manuka">Medical-Grade Manuka Honey</option>
+            <option value="phmb">PHMB 0.1% Solution</option>
+          </optgroup>
+          <optgroup label="Anti-inflammatories">
+            <option value="diclofenac">Diclofenac Gel 1%</option>
+            <option value="ibuprofen">Ibuprofen (400 mg)</option>
+            <option value="hydrocortisone">Hydrocortisone 1% Cream</option>
+            <option value="dexamethasone">Dexamethasone (4 mg)</option>
+          </optgroup>
+          <optgroup label="Hemostatics">
+            <option value="tranexamic">Tranexamic Acid (500 mg)</option>
+            <option value="cellulose">Oxidized Cellulose (Surgicel)</option>
+            <option value="thrombin">Topical Thrombin</option>
+          </optgroup>
+          <optgroup label="Antioxidants">
+            <option value="nac">N-Acetyl Cysteine (200 mg/mL)</option>
+            <option value="vitaminC">Ascorbic Acid (Vitamin C)</option>
+            <option value="vitaminE">Vitamin E (α-Tocopherol)</option>
+          </optgroup>
+          <optgroup label="Growth Factors">
+            <option value="becaplermin">Becaplermin Gel (Regranex)</option>
+            <option value="egf">Epidermal Growth Factor</option>
+          </optgroup>
+          <optgroup label="Debriders">
+            <option value="collagenase">Collagenase (Santyl)</option>
+          </optgroup>
+          <optgroup label="Analgesics">
+            <option value="lidocaine">Lidocaine 2% Gel</option>
+            <option value="prilocaine">Prilocaine-Lidocaine (EMLA)</option>
+          </optgroup>
+          <optgroup label="Emergency">
+            <option value="oxygen">Supplemental O₂ (Escalate)</option>
+            <option value="epinephrine">Epinephrine 1:1000</option>
+          </optgroup>
+        </select>
+        <label class="field-label" for="dose-mode">Mode</label>
+        <select id="dose-mode" class="field-select">
+          <option value="immediate">Immediate Bolus</option>
+          <option value="scheduled">Scheduled (every 8h)</option>
+          <option value="micro">Continuous Micro-dose</option>
+        </select>
+        <div class="dose-row">
+          <div class="dose-field">
+            <label class="field-label" for="dose-amount">Dose (mg)</label>
+            <input type="number" id="dose-amount" class="field-input" value="250" min="1" max="2000"/>
+          </div>
+          <div class="dose-field">
+            <label class="field-label" for="dose-weight">Wt (kg)</label>
+            <input type="number" id="dose-weight" class="field-input" value="70" min="1" max="200"/>
+          </div>
+        </div>
+      </div>
+      <button class="btn-release" id="btn-release">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Release Drug
+      </button>
+    </div>
+  </section>
+
+  <!-- BOTTOM: Release Log (full-width separate panel) -->
+  <section class="panel release-log-panel" id="release-log-section" aria-label="Release History">
+    <div class="panel-hdr" style="flex-shrink:0">
+      <h2 class="panel-title">Release History</h2>
+      <span class="panel-sub" id="release-count">0 releases</span>
+    </div>
+    <div class="log-scroll" id="release-log">
+      <span class="log-empty">No drug releases yet. Use the Drug Release panel to administer medication.</span>
+    </div>
+  </section>
+
+</main>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  <button class="mnav-btn active" data-panel="vitals" id="mnav-vitals">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span>Vitals</span>
+  </button>
+  <button class="mnav-btn" data-panel="chart" id="mnav-chart">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Trends</span>
+  </button>
+  <button class="mnav-btn" data-panel="wound" id="mnav-wound">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>Wound</span>
+  </button>
+  <button class="mnav-btn" data-panel="drug" id="mnav-drug">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H20a2 2 0 0 1 2 2v3"/><circle cx="17" cy="17" r="3"/><path d="m21 21-1.5-1.5"/></svg>
+    <span>Drugs</span>
+  </button>
+  <button class="mnav-btn" data-panel="log" id="mnav-log">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <span>Log</span>
+  </button>
+</nav>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay hidden" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3 id="settings-title">Settings</h3>
+      <button class="btn-icon" id="settings-close" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="setting-group">
+        <label class="field-label" for="s-api-key">Gemini API Key</label>
+        <div class="api-key-row">
+          <input type="password" id="s-api-key" class="field-input" placeholder="AIza…" autocomplete="off"/>
+          <button class="btn-secondary btn-sm" id="s-save-key">Save</button>
+        </div>
+        <p class="field-hint">Used for AI wound analysis and drug recommendations.</p>
+      </div>
+      <div class="setting-group">
+        <label class="field-label" for="s-patient-name">Patient Name</label>
+        <input type="text" id="s-patient-name" class="field-input" placeholder="Full name"/>
+      </div>
+      <div class="setting-group">
+        <label class="field-label" for="s-patient-id">Patient ID</label>
+        <input type="text" id="s-patient-id" class="field-input" placeholder="PT-001"/>
+      </div>
+      <div class="setting-group">
+        <label class="field-label" for="s-weight">Weight (kg)</label>
+        <input type="number" id="s-weight" class="field-input" value="70" min="1" max="300"/>
+      </div>
+      <div class="setting-group">
+        <label class="field-label" for="s-wound-type">Wound Type (manual override)</label>
+        <select id="s-wound-type" class="field-select">
+          <option value="unknown">Unknown / Let AI decide</option>
+          <option value="laceration">Laceration</option>
+          <option value="bruise">Bruise / Contusion</option>
+          <option value="burn">Burn</option>
+          <option value="abrasion">Abrasion</option>
+          <option value="ulcer">Chronic Ulcer</option>
+          <option value="infected">Infected Wound</option>
+          <option value="surgical">Surgical Wound</option>
+          <option value="pressure_injury">Pressure Injury</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label class="field-label">Simulation Scenario</label>
+        <div class="scenario-btns">
+          <button class="btn-secondary btn-sm" id="s-normal">Normal</button>
+          <button class="btn-secondary btn-sm" id="s-infection">Infection</button>
+          <button class="btn-secondary btn-sm" id="s-critical">Critical</button>
+        </div>
+      </div>
+      <button class="btn-primary" id="s-save-all" style="width:100%;margin-top:8px">Save Settings</button>
+      <button class="btn-ghost" id="btn-logout" style="width:100%;margin-top:6px;color:var(--danger);border-color:rgba(239,68,68,0.3)">⎋ Log Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- RELEASE CONFIRM MODAL -->
+<div class="modal-overlay hidden" id="release-modal" role="dialog" aria-modal="true" aria-labelledby="release-title">
+  <div class="modal-box modal-sm">
+    <div class="modal-hdr">
+      <h3 id="release-title">Confirm Drug Release</h3>
+      <button class="btn-icon" id="release-modal-close" aria-label="Cancel">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-detail" id="release-confirm-detail">—</div>
+      <div class="confirm-warn">⚠ This will trigger the drug delivery mechanism. Confirm only if authorized.</div>
+      <div class="confirm-btns">
+        <button class="btn-ghost" id="release-cancel">Cancel</button>
+        <button class="btn-release" id="release-confirm">✓ Confirm Release</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- CONNECT MODAL -->
+<div class="modal-overlay hidden" id="connect-modal" role="dialog" aria-modal="true" aria-labelledby="connect-title">
+  <div class="modal-box modal-sm">
+    <div class="modal-hdr">
+      <h3 id="connect-title">Connect Device</h3>
+      <button class="btn-icon" id="connect-close" aria-label="Cancel">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="field-hint" style="margin-bottom:16px">Choose how to connect to the smart bandage hardware.</p>
+      <div class="connect-options">
+        <button class="connect-opt" id="opt-ble">
+          <span class="conn-opt-icon">🔵</span>
+          <div><strong>Bluetooth (BLE)</strong><br/><small>Wireless — ESP32 / nRF52</small></div>
+        </button>
+        <button class="connect-opt" id="opt-serial">
+          <span class="conn-opt-icon">🔌</span>
+          <div><strong>USB Serial</strong><br/><small>Arduino / USB-C cable</small></div>
+        </button>
+        <button class="connect-opt active" id="opt-sim">
+          <span class="conn-opt-icon">🎭</span>
+          <div><strong>Simulation Mode</strong><br/><small>Demo with realistic data</small></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #app-shell -->
+
+<!-- ── PWA Install Banner ── -->
+<div id="pwa-install-banner" role="complementary" aria-label="Install app">
+  <img class="pwa-icon" src="assets/icons/icon-192.png" alt="SmartBandage AI" />
+  <div class="pwa-text">
+    <strong>Add to Home Screen</strong>
+    <small>Install SmartBandage AI for offline access</small>
+  </div>
+  <button id="pwa-install-btn">Install</button>
+  <button id="pwa-dismiss-btn" aria-label="Dismiss">✕</button>
+</div>
+
+<script src="js/hardware.js"></script>
+<script src="js/drug-engine.js"></script>
+<script src="js/wound-model.js"></script>
+<script src="js/app.js"></script>
+<script src="js/auth.js"></script>
+
+<!-- ── Service Worker + PWA Install ── -->
+<script>
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then(reg => {
+          console.log('[SW] Registered, scope:', reg.scope);
+          // Check for updates every 60 s
+          setInterval(() => reg.update(), 60000);
+        })
+        .catch(err => console.error('[SW] Registration failed:', err));
+    });
+  }
+
+  // PWA Install Prompt (Android / Chrome)
+  let deferredInstallPrompt = null;
+  const installBanner = document.getElementById('pwa-install-banner');
+  const installBtn    = document.getElementById('pwa-install-btn');
+  const dismissBtn    = document.getElementById('pwa-dismiss-btn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    // Show immediately — user can dismiss if they don't want it
+    if (!sessionStorage.getItem('pwa-dismissed')) {
+      installBanner.classList.add('show');
+    }
+  });
+
+  // iOS Safari — show a manual instruction banner after 2s
+  const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  const isInStandaloneMode = window.navigator.standalone === true;
+  if (isIos && !isInStandaloneMode && !sessionStorage.getItem('pwa-dismissed')) {
+    setTimeout(() => {
+      const iosBanner = document.createElement('div');
+      iosBanner.id = 'ios-install-banner';
+      iosBanner.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="assets/icons/icon-192.png" style="width:40px;height:40px;border-radius:10px;" />
+          <div>
+            <strong style="display:block;font-size:13px;color:#f0f6ff;font-family:'Space Grotesk',sans-serif;">Install SmartBandage AI</strong>
+            <span style="font-size:11px;color:#7a9ab5;">Tap <b style='color:#00e5a0'>Share 🔗</b> then <b style='color:#00e5a0'>Add to Home Screen</b></span>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove();sessionStorage.setItem('pwa-dismissed','1')" 
+            style="margin-left:auto;background:none;border:none;color:#4a6a85;font-size:20px;cursor:pointer;">✕</button>
+        </div>`;
+      Object.assign(iosBanner.style, {
+        position:'fixed', bottom: '80px', left:'12px', right:'12px', zIndex:'9999',
+        background:'linear-gradient(135deg,#0d2035,#0a1628)',
+        border:'1px solid rgba(0,229,160,0.35)',
+        borderRadius:'18px', padding:'16px',
+        boxShadow:'0 8px 32px rgba(0,0,0,0.5)'
+      });
+      document.body.appendChild(iosBanner);
+    }, 2000);
+  }
+
+  installBtn.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    installBanner.classList.remove('show');
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    console.log('[PWA] Install outcome:', outcome);
+    deferredInstallPrompt = null;
+  });
+
+  dismissBtn.addEventListener('click', () => {
+    installBanner.classList.remove('show');
+    sessionStorage.setItem('pwa-dismissed', '1');
+  });
+
+  // Hide banner if already installed
+  window.addEventListener('appinstalled', () => {
+    installBanner.classList.remove('show');
+    deferredInstallPrompt = null;
+    console.log('[PWA] App installed!');
+  });
+
+  // Handle shortcut panel navigation via URL params
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const panel = params.get('panel');
+    if (panel) {
+      // Will be picked up by the mobile nav after auth completes
+      sessionStorage.setItem('launch-panel', panel);
+    }
+  });
+</script>
+</body>
+</html>

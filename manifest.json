@@ -1,0 +1,66 @@
+{
+  "name": "SmartBandage AI",
+  "short_name": "SmartBandage",
+  "description": "AI-powered wound monitoring, vitals tracking, and intelligent drug delivery — real-time on your wrist.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#070e1c",
+  "theme_color": "#070e1c",
+  "categories": ["medical", "health", "utilities"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Vitals Monitor",
+      "short_name": "Vitals",
+      "description": "Live wound vitals dashboard",
+      "url": "/?panel=vitals",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI Wound Analysis",
+      "short_name": "AI Scan",
+      "description": "Upload wound image for AI analysis",
+      "url": "/?panel=wound",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Drug Management",
+      "short_name": "Drugs",
+      "description": "Manage and release medications",
+      "url": "/?panel=drug",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

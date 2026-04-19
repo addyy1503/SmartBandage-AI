@@ -1,0 +1,31 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Build outputs
+dist/
+build/
+.vercel/
+.netlify/
+
+# Environment / secrets
+.env
+.env.local
+.env.*
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Logs
+*.log
+
+# Temporary
+*.tmp
+*.bak

@@ -1,0 +1,432 @@
+/* ═══════════════════════════════════════════════════════
+   SMARTBANDAGE AI — MOBILE UI (finance-app aesthetic)
+   Dark glassmorphism · Teal accents · Card-based layout
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Only apply on mobile ─────────────────────────────── */
+@media (max-width: 768px) {
+
+/* ── HIDE desktop header, show mobile nav ─────────────── */
+.app-header  { display: none !important; }
+.mobile-nav  { display: flex !important; }
+
+/* ── ROOT TOKENS ──────────────────────────────────────── */
+:root {
+  --header-h:     0px;
+  --mob-nav-h:    72px;
+  --pad:          20px;
+  --card-r:       22px;
+}
+
+/* ── BODY / PAGE ──────────────────────────────────────── */
+body {
+  background: #070e1c;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: -120px; left: -60px;
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(0,229,160,0.18) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: 80px; right: -80px;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, rgba(0,212,200,0.10) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── APP SHELL ────────────────────────────────────────── */
+#app-shell { position: relative; z-index: 1; }
+
+/* ── MOBILE HEADER ────────────────────────────────────── */
+#mob-header {
+  padding: calc(56px + env(safe-area-inset-top)) var(--pad) 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.mob-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+/* Avatar + greeting */
+.mob-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mob-avatar {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00e5a0, #00b87d);
+  color: #060d1f;
+  font-size: 16px; font-weight: 800;
+  font-family: 'Space Grotesk', sans-serif;
+  display: flex; align-items: center; justify-content: center;
+  border: 2.5px solid rgba(0,229,160,0.5);
+  box-shadow: 0 0 0 4px rgba(0,229,160,0.12), 0 4px 20px rgba(0,229,160,0.3);
+  flex-shrink: 0;
+}
+.mob-greeting-text .mob-hi {
+  font-size: 13px; color: #7a9ab5;
+  display: block; font-weight: 400;
+  margin-bottom: 1px;
+}
+.mob-greeting-text .mob-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px; font-weight: 700;
+  color: #f0f6ff; display: block;
+}
+
+/* Header action buttons */
+.mob-header-actions { display: flex; gap: 10px; }
+.mob-icon-btn {
+  width: 42px; height: 42px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  display: flex; align-items: center; justify-content: center;
+  color: #7a9ab5;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-icon-btn:active {
+  transform: scale(0.90);
+  background: rgba(0,229,160,0.12);
+  border-color: rgba(0,229,160,0.3);
+}
+.mob-icon-btn .badge {
+  position: absolute;
+  top: -5px; right: -5px;
+  min-width: 18px; height: 18px;
+  background: #ef4444; color: #fff;
+  font-size: 10px; font-weight: 700;
+  border-radius: 99px; padding: 0 4px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #070e1c;
+}
+
+/* ── STATUS CARD (the "balance" card) ─────────────────── */
+.mob-status-card {
+  background: linear-gradient(140deg, rgba(0,229,160,0.14) 0%, rgba(0,180,130,0.06) 60%, rgba(0,212,200,0.08) 100%);
+  border: 1px solid rgba(0,229,160,0.25);
+  border-radius: var(--card-r);
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,229,160,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  position: relative;
+  overflow: hidden;
+}
+.mob-status-card::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(0,229,160,0.20) 0%, transparent 65%);
+}
+
+.mob-status-label {
+  font-size: 11px; color: rgba(0,229,160,0.7);
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
+  display: block; margin-bottom: 6px;
+}
+.mob-status-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px; font-weight: 700;
+  color: #f0f6ff; line-height: 1;
+  display: block; margin-bottom: 6px;
+}
+.mob-status-sub {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: rgba(0,229,160,0.85); font-weight: 500;
+}
+.mob-status-sub span { color: #a0c0d8; }
+
+/* Live pill */
+.mob-live-pill {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.mob-live-dot-wrap {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 99px;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.30);
+}
+.mob-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #22c55e;
+  animation: livePulse 1.4s ease infinite;
+}
+.mob-live-text {
+  font-size: 10px; font-weight: 800;
+  color: #22c55e; letter-spacing: 1.2px;
+}
+.mob-session-time {
+  font-size: 11px; color: #445566;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── QUICK ACTIONS GRID ───────────────────────────────── */
+#mob-quick-actions {
+  padding: 24px var(--pad) 8px;
+  position: relative; z-index: 10;
+}
+.mob-section-title {
+  font-size: 11px; font-weight: 700;
+  color: #4a6a85; text-transform: uppercase;
+  letter-spacing: 0.9px; margin-bottom: 16px;
+  display: block;
+}
+.mob-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.mob-action-btn {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 9px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.18s;
+  background: none; border: none; padding: 0;
+}
+.mob-action-btn:active { transform: scale(0.88); }
+.mob-action-icon {
+  width: 56px; height: 56px;
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  transition: box-shadow 0.2s;
+}
+.mob-action-icon.vitals  { background: linear-gradient(145deg, #1a2a2e, #0f1e22); border-color: rgba(248,113,113,0.30); }
+.mob-action-icon.trends  { background: linear-gradient(145deg, #0d2218, #091a13); border-color: rgba(0,229,160,0.30); }
+.mob-action-icon.wound   { background: linear-gradient(145deg, #1a1228, #11091e); border-color: rgba(167,139,250,0.30); }
+.mob-action-icon.drugs   { background: linear-gradient(145deg, #201600, #170f00); border-color: rgba(245,158,11,0.30); }
+.mob-action-icon.connect { background: linear-gradient(145deg, #0d1e30, #091422); border-color: rgba(56,189,248,0.30); }
+.mob-action-btn:active .mob-action-icon { box-shadow: 0 0 0 3px rgba(0,229,160,0.2); }
+.mob-action-label {
+  font-size: 11px; font-weight: 600;
+  color: #6a8aa8; text-align: center;
+}
+
+/* ── LIVE VITALS SCROLL ROW ───────────────────────────── */
+#mob-vitals-row {
+  padding: 20px 0 8px;
+  position: relative; z-index: 10;
+}
+.mob-vitals-scroll {
+  display: flex; gap: 12px;
+  overflow-x: auto;
+  padding: 4px var(--pad) 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.mob-vitals-scroll::-webkit-scrollbar { display: none; }
+
+.mob-vital-card {
+  flex-shrink: 0;
+  width: 136px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  padding: 18px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+/* Coloured top stripe */
+.mob-vital-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 20px 20px 0 0;
+}
+.mob-vital-card.temp::before  { background: linear-gradient(90deg, #f87171, #ef4444); }
+.mob-vital-card.spo2::before  { background: linear-gradient(90deg, #00e5a0, #00d4c8); }
+.mob-vital-card.h2o2::before  { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
+.mob-vital-card.hr::before    { background: linear-gradient(90deg, #fb923c, #f97316); }
+
+.mob-vital-card.warning { border-color: rgba(245,158,11,0.45); box-shadow: 0 0 0 1px rgba(245,158,11,0.2); }
+.mob-vital-card.critical {
+  border-color: rgba(239,68,68,0.5);
+  box-shadow: 0 0 0 1px rgba(239,68,68,0.25);
+  animation: criticalPulse 2s ease infinite;
+}
+
+.mob-vital-top { display: flex; align-items: center; justify-content: space-between; }
+.mob-vital-icon { font-size: 20px; line-height: 1; }
+.mob-vital-badge {
+  font-size: 9px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 3px 8px; border-radius: 99px;
+}
+.mob-vital-badge.normal   { background: rgba(34,197,94,0.15);   color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+.mob-vital-badge.warning  { background: rgba(245,158,11,0.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+.mob-vital-badge.critical { background: rgba(239,68,68,0.15);   color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+.mob-vital-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px; font-weight: 700;
+  color: #f0f6ff; line-height: 1;
+}
+.mob-vital-unit {
+  font-size: 11px; color: #4a6a85; font-weight: 500;
+  margin-top: 2px;
+}
+.mob-vital-label {
+  font-size: 11px; color: #4a6a85; font-weight: 500;
+}
+
+/* ── DASHBOARD PANELS (mobile) ────────────────────────── */
+.dashboard {
+  display: block !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding: 0 0 calc(var(--mob-nav-h) + 16px) 0 !important;
+  grid-template-areas: none !important;
+  position: relative; z-index: 10;
+}
+
+/* All panels hidden by default on mobile */
+.panel               { display: none !important; }
+.panel.mob-active    { display: flex !important; }
+.center-col          { display: contents !important; }
+.center-col .panel   { display: none !important; }
+.center-col .panel.mob-active { display: flex !important; }
+
+/* Active panel appearance */
+.panel.mob-active {
+  margin: 8px var(--pad) 0 !important;
+  border-radius: var(--card-r) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  background: rgba(255,255,255,0.04) !important;
+  backdrop-filter: blur(16px);
+  padding: 20px !important;
+  flex-direction: column !important;
+}
+
+/* Vitals panel */
+.vitals-panel.mob-active .gauges-grid {
+  flex-direction: row;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.vitals-panel.mob-active .gauge-wrap {
+  width: calc(33% - 6px);
+  padding: 10px 8px;
+  border-radius: 16px;
+}
+.vitals-panel.mob-active .gauge-svg { width: 82px; height: 82px; }
+.vitals-panel.mob-active .vitals-stats {
+  flex-direction: row; flex-wrap: wrap; gap: 8px; padding-top: 14px;
+}
+.vitals-panel.mob-active .stat-row {
+  flex: 1 1 48%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+/* Chart */
+.chart-panel.mob-active { min-height: 300px; }
+.chart-box { min-height: 220px; }
+
+/* Wound */
+.wound-body { grid-template-columns: 1fr !important; }
+
+/* Drugs */
+.drug-suggestions { max-height: none; }
+
+/* Release log */
+.release-log-panel.mob-active { flex-direction: column !important; max-height: none !important; }
+.release-log-panel.mob-active .log-scroll {
+  flex-direction: column; overflow-x: hidden;
+  overflow-y: auto; max-height: 280px;
+}
+.log-entry { min-width: unset; }
+
+/* ── BOTTOM NAV ───────────────────────────────────────── */
+.mobile-nav {
+  height: var(--mob-nav-h) !important;
+  padding: 0 8px env(safe-area-inset-bottom) !important;
+  background: rgba(7,14,28,0.97) !important;
+  border-top: 1px solid rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+}
+.mnav-btn {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 8px 4px !important;
+  border-radius: 14px !important;
+  color: #2d4a60 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  transition: color 0.2s !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.mnav-btn.active {
+  color: #00e5a0 !important;
+}
+.mnav-btn.active svg {
+  filter: drop-shadow(0 0 8px rgba(0,229,160,0.7)) !important;
+}
+.mnav-btn span { letter-spacing: 0.2px; }
+
+/* ── PWA INSTALL BANNER ───────────────────────────────── */
+#pwa-install-banner.show {
+  display: flex !important;
+  position: fixed !important;
+  bottom: calc(var(--mob-nav-h) + 10px) !important;
+  left: 12px !important; right: 12px !important;
+  border-radius: 18px !important;
+  padding: 14px 16px calc(14px) !important;
+  z-index: 9999 !important;
+  background: linear-gradient(135deg, #0d2035, #0a1628) !important;
+  border: 1px solid rgba(0,229,160,0.35) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,229,160,0.1) !important;
+}
+
+/* ── ALERT BANNER ─────────────────────────────────────── */
+.alert-banner {
+  top: 0 !important;
+  border-radius: 0 0 16px 16px;
+  z-index: 200;
+}
+
+} /* end @media (max-width: 768px) */
+
+/* ── Always hide mob sections on desktop ─────────────── */
+#mob-header, #mob-quick-actions, #mob-vitals-row { display: none; }
+@media (max-width: 768px) {
+  #mob-header, #mob-quick-actions, #mob-vitals-row { display: block; }
+}
