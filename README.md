@@ -195,7 +195,7 @@ Once you have wound images:
 
 ## 📜 License
 
-MIT License[link text](Smart_bandage/LICENSE) — free to use, modify, and distribute.
+MIT [License](Smart_bandage/LICENSE) — free to use, modify, and distribute.
 
 ---
 
