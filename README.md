@@ -30,6 +30,8 @@ npx serve . -p 3000
 ```
 Then open **http://localhost:3000** in Chrome or Edge.
 
+And for Mobile app **https://smartbandage-ai.vercel.app/** , Select "Add to home screen" on the page 
+
 ### Deploy (Free)
 ```bash
 # Vercel (recommended)
