@@ -123,7 +123,7 @@ class WoundModel {
 
     const input = this.preprocessImage(imgElement);
     const features = this.baseModel.predict(input);
-    
+
     this.trainingData.xs.push(features);
     this.trainingData.ys.push(labelIdx);
     input.dispose();
@@ -146,7 +146,7 @@ class WoundModel {
       // Stack training data
       const xs = tf.concat(this.trainingData.xs);
       const ys = tf.oneHot(tf.tensor1d(this.trainingData.ys, 'int32'), WOUND_CLASSES.length);
-      
+
       const featureSize = xs.shape[1];
 
       // Build classification head
