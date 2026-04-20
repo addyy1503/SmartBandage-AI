@@ -267,6 +267,7 @@ body::after {
 .mob-vital-card.spo2::before  { background: linear-gradient(90deg, #00e5a0, #00d4c8); }
 .mob-vital-card.h2o2::before  { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
 .mob-vital-card.hr::before    { background: linear-gradient(90deg, #fb923c, #f97316); }
+.mob-vital-card.ph::before    { background: linear-gradient(90deg, #22d3ee, #06b6d4); }
 
 .mob-vital-card.warning { border-color: rgba(245,158,11,0.45); box-shadow: 0 0 0 1px rgba(245,158,11,0.2); }
 .mob-vital-card.critical {
@@ -338,6 +339,7 @@ body::after {
   width: calc(33% - 6px);
   padding: 10px 8px;
   border-radius: 16px;
+  min-width: 0;
 }
 .vitals-panel.mob-active .gauge-svg { width: 82px; height: 82px; }
 .vitals-panel.mob-active .vitals-stats {

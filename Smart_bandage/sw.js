@@ -3,7 +3,7 @@
    Network-first strategy, instant SW takeover
    ═══════════════════════════════════════════ */
 
-const CACHE = 'sb-v6';
+const CACHE = 'sb-v7';
 const ASSETS = [
   '/',
   '/index.html',
