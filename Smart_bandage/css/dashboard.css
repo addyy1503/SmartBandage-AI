@@ -56,6 +56,41 @@
 .g-temp { stroke: #f87171; }
 .g-spo2 { stroke: var(--green); }
 .g-h2o2 { stroke: #a78bfa; }
+.g-hr   { stroke: #fb7185; }
+.g-ph   { stroke: #22d3ee; }
+
+/* ── Beat Detected Indicator ──────────────── */
+.beat-indicator {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px 14px; border-radius: var(--radius);
+  background: var(--surface2); border: 1px solid var(--border);
+  opacity: 0.35; transition: opacity .3s, border-color .3s, background .3s;
+}
+.beat-indicator.active {
+  opacity: 1;
+  border-color: rgba(251,113,133,0.5);
+  background: rgba(251,113,133,0.06);
+}
+.beat-heart {
+  font-size: 20px; display: inline-block;
+}
+.beat-heart.pulse {
+  animation: heartPulse 0.6s ease;
+}
+.beat-text {
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+.beat-indicator.active .beat-text {
+  color: #fb7185;
+}
+@keyframes heartPulse {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.35); }
+  50%  { transform: scale(1); }
+  75%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
 
 .g-val  {
   font-family: var(--font-head); font-size: 20px; font-weight: 700;
@@ -106,6 +141,8 @@
 .ctoggle.active[data-ds="0"] { color: #f87171; border-color: #f87171; background: rgba(248,113,113,0.1); }
 .ctoggle.active[data-ds="1"] { color: var(--green); border-color: var(--green); background: var(--green-dim); }
 .ctoggle.active[data-ds="2"] { color: #a78bfa; border-color: #a78bfa; background: rgba(167,139,250,0.1); }
+.ctoggle.active[data-ds="3"] { color: #fb7185; border-color: #fb7185; background: rgba(251,113,133,0.1); }
+.ctoggle.active[data-ds="4"] { color: #22d3ee; border-color: #22d3ee; background: rgba(34,211,238,0.1); }
 
 /* ── WOUND PANEL ───────────────────────────── */
 .wound-panel { flex-shrink: 0; }
@@ -258,8 +295,8 @@
 
   /* Gauges: horizontal row */
   .gauges-grid { flex-direction: row; justify-content: space-around; flex-wrap: wrap; }
-  .gauge-wrap  { width: calc(33% - 8px); padding: 8px; }
-  .gauge-svg   { width: 88px; height: 88px; }
+  .gauge-wrap  { width: calc(33% - 8px); padding: 8px; min-width: 0; }
+  .gauge-svg   { width: 80px; height: 80px; }
 
   .wound-body { grid-template-columns: 1fr; }
 

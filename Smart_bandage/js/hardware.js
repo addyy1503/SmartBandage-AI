@@ -69,10 +69,20 @@ class HardwareAdapter extends EventTarget {
           for (const line of lines) {
             try {
               const data = JSON.parse(line.trim());
-              if (data.temp  !== undefined) this._emit({ metric: 'temperature', value: data.temp,  mode: 'serial' });
-              if (data.spo2  !== undefined) this._emit({ metric: 'spo2',        value: data.spo2,  mode: 'serial' });
-              if (data.h2o2  !== undefined) this._emit({ metric: 'h2o2',        value: data.h2o2,  mode: 'serial' });
-              if (data.hr    !== undefined) this._emit({ metric: 'heartRate',   value: data.hr,    mode: 'serial' });
+              // Skip status messages (e.g. {"status":"SYSTEM READY"})
+              if (data.status) { console.log('[ESP32]', data.status); continue; }
+              // Build a batch object matching what updateVitalsUI expects
+              const batch = {};
+              if (data.temp !== undefined) batch.temperature = data.temp;
+              if (data.spo2 !== undefined) batch.spo2 = data.spo2;
+              if (data.h2o2 !== undefined) batch.h2o2 = data.h2o2;
+              if (data.hr   !== undefined) batch.heartRate = data.hr;
+              if (data.ph   !== undefined) batch.ph = data.ph;
+              if (data.ecg  !== undefined) batch.ecg = data.ecg;
+              if (data.beat !== undefined) batch.beat = data.beat;
+              if (Object.keys(batch).length > 0) {
+                this._emit({ batch, mode: 'serial' });
+              }
             } catch(_) {}
           }
         }
@@ -93,23 +103,30 @@ class HardwareAdapter extends EventTarget {
       const u = 1 - Math.random(), v = Math.random();
       return mean + std * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
     };
-    let temp, spo2, h2o2;
+    let temp, spo2, h2o2, hr, ph;
     switch (this._scenario) {
       case 'infection':
         temp = gauss(37.2 + Math.min(t * 0.018, 1.8), 0.12);
         spo2 = gauss(96 - Math.min(t * 0.03, 4), 0.6);
-        h2o2 = gauss(0.3 + Math.min(t * 0.012, 0.7), 0.04); break;
+        h2o2 = gauss(0.3 + Math.min(t * 0.012, 0.7), 0.04);
+        hr   = Math.round(gauss(88 + Math.min(t * 0.1, 15), 4));
+        ph   = gauss(7.4 + Math.min(t * 0.015, 1.1), 0.08); break;
       case 'critical':
-        temp = gauss(39.2, 0.15); spo2 = gauss(88, 1.2); h2o2 = gauss(1.1, 0.08); break;
+        temp = gauss(39.2, 0.15); spo2 = gauss(88, 1.2); h2o2 = gauss(1.1, 0.08);
+        hr   = Math.round(gauss(120, 8));
+        ph   = gauss(9.0, 0.15); break;
       default:
         temp = gauss(36.8, 0.12); spo2 = gauss(97.5, 0.5); h2o2 = gauss(0.20, 0.03);
+        hr   = Math.round(gauss(72, 5));
+        ph   = gauss(7.0, 0.12);
     }
     if (Math.random() < 0.04) spo2 -= gauss(3, 1);
     return {
       temperature: parseFloat(Math.max(34, Math.min(42, temp)).toFixed(1)),
       spo2:        parseFloat(Math.max(70, Math.min(100, spo2)).toFixed(1)),
       h2o2:        parseFloat(Math.max(0,  Math.min(3,   h2o2)).toFixed(3)),
-      heartRate:   Math.round(gauss(72, 5)),
+      heartRate:   Math.max(0, Math.min(220, hr)),
+      ph:          parseFloat(Math.max(0,  Math.min(14,  ph)).toFixed(1)),
     };
   }
   _emit(detail) { this.dispatchEvent(new CustomEvent('data', { detail })); }

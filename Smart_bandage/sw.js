@@ -3,13 +3,14 @@
    Network-first strategy, instant SW takeover
    ═══════════════════════════════════════════ */
 
-const CACHE = 'sb-v5';
+const CACHE = 'sb-v6';
 const ASSETS = [
   '/',
   '/index.html',
   '/css/main.css',
   '/css/dashboard.css',
   '/css/auth.css',
+  '/css/mobile.css',
   '/js/hardware.js',
   '/js/drug-engine.js',
   '/js/wound-model.js',

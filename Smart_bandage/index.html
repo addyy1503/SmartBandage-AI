@@ -423,13 +423,24 @@
     <div class="mob-vital-card hr" id="mvc-hr">
       <div class="mob-vital-top">
         <span class="mob-vital-icon">❤️</span>
-        <span class="mob-vital-badge normal">Normal</span>
+        <span class="mob-vital-badge normal" id="mvc-hr-badge">Normal</span>
       </div>
       <div>
         <div class="mob-vital-value" id="mvc-hr-val">72</div>
         <div class="mob-vital-unit">bpm</div>
       </div>
       <div class="mob-vital-label">Heart Rate</div>
+    </div>
+    <div class="mob-vital-card ph" id="mvc-ph">
+      <div class="mob-vital-top">
+        <span class="mob-vital-icon">🧫</span>
+        <span class="mob-vital-badge normal" id="mvc-ph-badge">Normal</span>
+      </div>
+      <div>
+        <div class="mob-vital-value" id="mvc-ph-val">7.0</div>
+        <div class="mob-vital-unit">pH</div>
+      </div>
+      <div class="mob-vital-label">Wound pH</div>
     </div>
   </div>
 </div>
@@ -474,6 +485,31 @@
         <div class="gauge-label">H₂O₂</div>
         <div class="gauge-badge normal" id="h2o2-badge">Normal</div>
       </div>
+      <div class="gauge-wrap" id="hr-wrap">
+        <svg class="gauge-svg" viewBox="0 0 120 120">
+          <circle class="g-track" cx="60" cy="60" r="48"/>
+          <circle class="g-fill g-hr" id="g-hr" cx="60" cy="60" r="48"/>
+          <text class="g-val" x="60" y="57" text-anchor="middle" id="hr-val">72</text>
+          <text class="g-unit" x="60" y="73" text-anchor="middle">bpm</text>
+        </svg>
+        <div class="gauge-label">Heart Rate</div>
+        <div class="gauge-badge normal" id="hr-badge">Normal</div>
+      </div>
+      <div class="gauge-wrap" id="ph-wrap">
+        <svg class="gauge-svg" viewBox="0 0 120 120">
+          <circle class="g-track" cx="60" cy="60" r="48"/>
+          <circle class="g-fill g-ph" id="g-ph" cx="60" cy="60" r="48"/>
+          <text class="g-val" x="60" y="57" text-anchor="middle" id="ph-val">7.0</text>
+          <text class="g-unit" x="60" y="73" text-anchor="middle">pH</text>
+        </svg>
+        <div class="gauge-label">Wound pH</div>
+        <div class="gauge-badge normal" id="ph-badge">Normal</div>
+      </div>
+    </div>
+    <!-- Beat Detected Indicator -->
+    <div class="beat-indicator" id="beat-indicator">
+      <span class="beat-heart" id="beat-heart">❤️</span>
+      <span class="beat-text" id="beat-text">Beat Detected</span>
     </div>
     <div class="vitals-stats">
       <div class="stat-row"><span>Wound ΔTemp</span><span id="stat-delta">+0.3 °C</span></div>
@@ -492,6 +528,8 @@
           <button class="ctoggle active" data-ds="0" id="ct-temp">🌡 Temp</button>
           <button class="ctoggle active" data-ds="1" id="ct-spo2">🩸 SpO₂</button>
           <button class="ctoggle active" data-ds="2" id="ct-h2o2">🧪 H₂O₂</button>
+          <button class="ctoggle active" data-ds="3" id="ct-hr">❤️ HR</button>
+          <button class="ctoggle active" data-ds="4" id="ct-ph">🧫 pH</button>
         </div>
       </div>
       <div class="chart-box"><canvas id="vitals-chart" aria-label="Live vitals chart"></canvas></div>

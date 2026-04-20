@@ -1,8 +1,8 @@
 /* app.js — Main application logic */
 
 const state = {
-  vitals: { temperature: 36.8, spo2: 97, h2o2: 0.20, heartRate: 72 },
-  history: { temperature: [], spo2: [], h2o2: [], labels: [] },
+  vitals: { temperature: 36.8, spo2: 97, h2o2: 0.20, heartRate: 72, ph: 7.0 },
+  history: { temperature: [], spo2: [], h2o2: [], heartRate: [], ph: [], labels: [] },
   woundType: 'unknown', woundSeverity: 0, woundImageB64: null,
   patient: { name: 'John Patient', id: 'PT-001', weight: 70 },
   alerts: [], releases: [], sessionStart: Date.now(),
@@ -18,9 +18,11 @@ const CIRC = 2 * Math.PI * 48;
 const $ = id => document.getElementById(id);
 
 const RANGES = {
-  temperature: { min: 34, max: 42, warn: 38,  crit: 39,  invert: false },
-  spo2:        { min: 70, max: 100,warn: 92,  crit: 88,  invert: true  },
-  h2o2:        { min: 0,  max: 3,  warn: 0.8, crit: 1.2, invert: false },
+  temperature: { min: 34, max: 42,  warn: 38,  crit: 39,   invert: false },
+  spo2:        { min: 70, max: 100, warn: 92,  crit: 88,   invert: true  },
+  h2o2:        { min: 0,  max: 3,   warn: 0.8, crit: 1.2,  invert: false },
+  heartRate:   { min: 40, max: 180, warn: 110, crit: 140,  invert: false },
+  ph:          { min: 0,  max: 14,  warn: 8.5, crit: 9.5,  invert: false },
 };
 
 function gaugeOffset(metric, value) {
@@ -44,9 +46,11 @@ function initChart() {
     data: {
       labels: [],
       datasets: [
-        { label:'Temp (°C)',    data:[], borderColor:'#f87171', backgroundColor:g('rgba(248,113,113,0.2)','rgba(248,113,113,0)'), tension:.4, fill:true, pointRadius:0, borderWidth:2 },
-        { label:'SpO₂ (%)',    data:[], borderColor:'#00e5a0', backgroundColor:g('rgba(0,229,160,0.2)','rgba(0,229,160,0)'),     tension:.4, fill:true, pointRadius:0, borderWidth:2 },
-        { label:'H₂O₂ (×10)', data:[], borderColor:'#a78bfa', backgroundColor:g('rgba(167,139,250,0.2)','rgba(167,139,250,0)'), tension:.4, fill:true, pointRadius:0, borderWidth:2 },
+        { label:'Temp (°C)',    data:[], borderColor:'#f87171', backgroundColor:g('rgba(248,113,113,0.2)','rgba(248,113,113,0)'), tension:.4, fill:true, pointRadius:0, borderWidth:2, yAxisID:'y' },
+        { label:'SpO₂ (%)',    data:[], borderColor:'#00e5a0', backgroundColor:g('rgba(0,229,160,0.2)','rgba(0,229,160,0)'),     tension:.4, fill:true, pointRadius:0, borderWidth:2, yAxisID:'y' },
+        { label:'H₂O₂ (×10)', data:[], borderColor:'#a78bfa', backgroundColor:g('rgba(167,139,250,0.2)','rgba(167,139,250,0)'), tension:.4, fill:true, pointRadius:0, borderWidth:2, yAxisID:'y' },
+        { label:'HR (bpm)',     data:[], borderColor:'#fb7185', backgroundColor:g('rgba(251,113,133,0.2)','rgba(251,113,133,0)'), tension:.4, fill:true, pointRadius:0, borderWidth:2, yAxisID:'y2' },
+        { label:'pH',           data:[], borderColor:'#22d3ee', backgroundColor:g('rgba(34,211,238,0.2)','rgba(34,211,238,0)'),   tension:.4, fill:true, pointRadius:0, borderWidth:2, yAxisID:'y3' },
       ],
     },
     options: {
@@ -55,7 +59,9 @@ function initChart() {
       plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'rgba(13,25,41,0.95)', borderColor:'rgba(255,255,255,0.1)', borderWidth:1, titleColor:'#8fa3be', bodyColor:'#f0f6ff' } },
       scales:{
         x:{ grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{ color:'#445566', font:{ size:10 }, maxTicksLimit:10 } },
-        y:{ grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{ color:'#445566', font:{ size:10 } } },
+        y:{ position:'left', grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{ color:'#445566', font:{ size:10 } }, title:{ display:false } },
+        y2:{ position:'right', grid:{ drawOnChartArea:false }, ticks:{ color:'#fb7185', font:{ size:10 } }, title:{ display:true, text:'HR (bpm)', color:'#fb7185', font:{ size:10 } }, min:40, max:180 },
+        y3:{ display:false, min:0, max:14 },
       },
     },
   });
@@ -65,12 +71,17 @@ function initChart() {
 function updateVitalsUI(v) {
   Object.assign(state.vitals, v);
 
-  [['temperature','temp'],['spo2','spo2'],['h2o2','h2o2']].forEach(([metric, key]) => {
+  // Update all gauge-based vitals (temp, spo2, h2o2, heartRate, ph)
+  [['temperature','temp'],['spo2','spo2'],['h2o2','h2o2'],['heartRate','hr'],['ph','ph']].forEach(([metric, key]) => {
     const val = state.vitals[metric];
+    if (val === undefined) return;
     const status = getStatus(metric, val);
     const fill = $('g-' + key);
     if (fill) fill.style.strokeDashoffset = gaugeOffset(metric, val);
-    const disp = metric === 'h2o2' ? val.toFixed(3) : val.toFixed(1);
+    let disp;
+    if (metric === 'h2o2') disp = val.toFixed(3);
+    else if (metric === 'heartRate') disp = Math.round(val).toString();
+    else disp = val.toFixed(1);
     const valEl = $(key + '-val'); if (valEl) valEl.textContent = disp;
     const badge = $(key + '-badge'); if (badge) { badge.className = 'gauge-badge ' + status; badge.textContent = status.charAt(0).toUpperCase() + status.slice(1); }
     const wrap  = $(key + '-wrap');  if (wrap)  wrap.className  = 'gauge-wrap ' + (status !== 'normal' ? status : '');
@@ -84,10 +95,24 @@ function updateVitalsUI(v) {
     if (mvcCard)  { mvcCard.className = mvcCard.className.replace(/\s*(warning|critical)/g,''); if (status !== 'normal') mvcCard.classList.add(status); }
   });
 
-  const hr = v.heartRate || state.vitals.heartRate;
-  $('stat-hr').textContent    = hr + ' bpm';
+  // Beat detection animation
+  // In serial mode: ESP32 sends beat:1 when MAX30100 detects a beat
+  // In simulation mode: pulse whenever HR > 0
+  const hr = state.vitals.heartRate;
+  const hasBeat = v.beat === 1 || (hr > 0);
+  const beatEl = $('beat-indicator');
+  const heartEl = $('beat-heart');
+  if (hasBeat && beatEl) {
+    beatEl.classList.add('active');
+    heartEl?.classList.remove('pulse');
+    void heartEl?.offsetWidth; // trigger reflow for re-animation
+    heartEl?.classList.add('pulse');
+  } else if (beatEl) {
+    beatEl.classList.remove('active');
+  }
+
+  $('stat-hr').textContent    = Math.round(hr) + ' bpm';
   $('stat-delta').textContent = '+' + (state.vitals.temperature - 36.5).toFixed(1) + ' °C';
-  const mvcHr = $('mvc-hr-val'); if (mvcHr) mvcHr.textContent = hr;
 
   // Mobile quick-summary
   const mTemp = $('mob-temp-quick'); if (mTemp) mTemp.textContent = state.vitals.temperature.toFixed(1) + '°C';
@@ -109,13 +134,17 @@ function updateVitalsUI(v) {
   state.history.temperature.push(state.vitals.temperature);
   state.history.spo2.push(state.vitals.spo2);
   state.history.h2o2.push(parseFloat((state.vitals.h2o2 * 10).toFixed(2)));
+  state.history.heartRate.push(state.vitals.heartRate);
+  state.history.ph.push(state.vitals.ph);
   if (state.history.labels.length > MAX_POINTS)
-    ['labels','temperature','spo2','h2o2'].forEach(k => state.history[k].shift());
+    ['labels','temperature','spo2','h2o2','heartRate','ph'].forEach(k => state.history[k].shift());
 
   chart.data.labels = state.history.labels;
   chart.data.datasets[0].data = state.history.temperature;
   chart.data.datasets[1].data = state.history.spo2;
   chart.data.datasets[2].data = state.history.h2o2;
+  chart.data.datasets[3].data = state.history.heartRate;
+  chart.data.datasets[4].data = state.history.ph;
   chart.update('none');
 
   checkAlerts();
