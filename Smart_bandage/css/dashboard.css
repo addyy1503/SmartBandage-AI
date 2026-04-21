@@ -293,10 +293,10 @@
 
   .mobile-nav { display: flex; }
 
-  /* Gauges: horizontal row */
-  .gauges-grid { flex-direction: row; justify-content: space-around; flex-wrap: wrap; }
-  .gauge-wrap  { width: calc(33% - 8px); padding: 8px; min-width: 0; }
-  .gauge-svg   { width: 80px; height: 80px; }
+  /* Gauges: 2-col grid to show all 5 vitals */
+  .gauges-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .gauge-wrap  { width: 100%; padding: 8px; min-width: 0; }
+  .gauge-wrap:last-child { grid-column: 1 / -1; max-width: 50%; justify-self: center; }
 
   .wound-body { grid-template-columns: 1fr; }
 

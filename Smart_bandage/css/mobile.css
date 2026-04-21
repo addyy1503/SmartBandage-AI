@@ -268,6 +268,9 @@ body::after {
 .mob-vital-card.h2o2::before  { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
 .mob-vital-card.hr::before    { background: linear-gradient(90deg, #fb923c, #f97316); }
 .mob-vital-card.ph::before    { background: linear-gradient(90deg, #22d3ee, #06b6d4); }
+.mob-vital-card.beat::before  { background: linear-gradient(90deg, #fb7185, #f43f5e); }
+.mob-vital-card.beat.active   { border-color: rgba(251,113,133,0.45); box-shadow: 0 0 12px rgba(251,113,133,0.2); }
+.mob-vital-card.beat .mob-beat-text { font-size: 22px; }
 
 .mob-vital-card.warning { border-color: rgba(245,158,11,0.45); box-shadow: 0 0 0 1px rgba(245,158,11,0.2); }
 .mob-vital-card.critical {
@@ -330,18 +333,36 @@ body::after {
 
 /* Vitals panel */
 .vitals-panel.mob-active .gauges-grid {
-  flex-direction: row;
-  justify-content: space-around;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 .vitals-panel.mob-active .gauge-wrap {
-  width: calc(33% - 6px);
+  width: 100%;
   padding: 10px 8px;
   border-radius: 16px;
   min-width: 0;
 }
+.vitals-panel.mob-active .gauge-wrap:last-child {
+  grid-column: 1 / -1;
+  max-width: 50%;
+  justify-self: center;
+}
 .vitals-panel.mob-active .gauge-svg { width: 82px; height: 82px; }
+
+/* Beat indicator on mobile */
+.vitals-panel.mob-active .beat-indicator {
+  margin: 4px 0;
+  border-radius: 16px;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.vitals-panel.mob-active .beat-indicator.active {
+  border-color: rgba(251,113,133,0.45);
+  background: rgba(251,113,133,0.06);
+}
+
 .vitals-panel.mob-active .vitals-stats {
   flex-direction: row; flex-wrap: wrap; gap: 8px; padding-top: 14px;
 }

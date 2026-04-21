@@ -111,6 +111,18 @@ function updateVitalsUI(v) {
     beatEl.classList.remove('active');
   }
 
+  // Mobile beat indicator
+  const mobBeatEl = $('mob-beat-indicator');
+  const mobHeartEl = $('mob-beat-heart');
+  if (hasBeat && mobBeatEl) {
+    mobBeatEl.classList.add('active');
+    mobHeartEl?.classList.remove('pulse');
+    void mobHeartEl?.offsetWidth;
+    mobHeartEl?.classList.add('pulse');
+  } else if (mobBeatEl) {
+    mobBeatEl.classList.remove('active');
+  }
+
   $('stat-hr').textContent    = Math.round(hr) + ' bpm';
   $('stat-delta').textContent = '+' + (state.vitals.temperature - 36.5).toFixed(1) + ' °C';
 
@@ -118,14 +130,17 @@ function updateVitalsUI(v) {
   const mTemp = $('mob-temp-quick'); if (mTemp) mTemp.textContent = state.vitals.temperature.toFixed(1) + '°C';
   const mSpo2 = $('mob-spo2-quick'); if (mSpo2) mSpo2.textContent = state.vitals.spo2.toFixed(0) + '% SpO₂';
 
-  // Health score
+  // Health score (includes all 5 vitals)
   const score = $('mob-health-score');
   if (score) {
     const ts = getStatus('temperature', state.vitals.temperature);
     const ss = getStatus('spo2', state.vitals.spo2);
     const hs = getStatus('h2o2', state.vitals.h2o2);
-    if (ts === 'critical' || ss === 'critical' || hs === 'critical') { score.textContent = 'Critical'; score.style.color = '#ef4444'; }
-    else if (ts === 'warning' || ss === 'warning' || hs === 'warning') { score.textContent = 'Monitor'; score.style.color = '#f59e0b'; }
+    const hrs = getStatus('heartRate', state.vitals.heartRate);
+    const phs = getStatus('ph', state.vitals.ph);
+    const allStatuses = [ts, ss, hs, hrs, phs];
+    if (allStatuses.includes('critical')) { score.textContent = 'Critical'; score.style.color = '#ef4444'; }
+    else if (allStatuses.includes('warning')) { score.textContent = 'Monitor'; score.style.color = '#f59e0b'; }
     else { score.textContent = 'Good'; score.style.color = '#00e5a0'; }
   }
 
