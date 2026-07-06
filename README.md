@@ -4,6 +4,8 @@
 
 ![SmartBandage AI](https://img.shields.io/badge/status-active-brightgreen) ![PWA](https://img.shields.io/badge/PWA-ready-blue) ![AI](https://img.shields.io/badge/AI-Gemini%202.0-orange) ![License](https://img.shields.io/badge/license-MIT-purple)
 
+🌐 **Live Demo:** [smartbandage-ai.vercel.app](https://smartbandage-ai.vercel.app)
+
 ---
 
 ## ✨ Features
@@ -24,20 +26,26 @@
 
 ## 🚀 Quick Start
 
+### 🌐 Live App
+The app is deployed and ready to use at:
+**https://smartbandage-ai.vercel.app**
+
 ### Run Locally
 ```bash
 npx serve . -p 3000
 ```
 Then open **http://localhost:3000** in Chrome or Edge.
 
-
-### Deploy (Free)
+### Deploy Your Own
 ```bash
-# Vercel (recommended)
-npx vercel
+# Install Vercel CLI (once)
+npm i -g vercel
 
-# Or drag & drop folder to https://app.netlify.com/drop
+# Login & deploy to production
+vercel login
+vercel --prod --yes
 ```
+Your app will be live at a `*.vercel.app` domain within seconds.
 
 ---
 
