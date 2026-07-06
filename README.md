@@ -30,12 +30,6 @@
 The app is deployed and ready to use at:
 **https://smartbandage-ai.vercel.app**
 
-### Run Locally
-```bash
-npx serve . -p 3000
-```
-Then open **http://localhost:3000** in Chrome or Edge.
-
 ### Deploy Your Own
 ```bash
 # Install Vercel CLI (once)
